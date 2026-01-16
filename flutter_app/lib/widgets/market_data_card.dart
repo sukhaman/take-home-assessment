@@ -4,8 +4,13 @@ import 'package:intl/intl.dart';
 
 class MarketDataCard extends StatelessWidget {
   final MarketData marketData;
+  final Duration animationDuration;
 
-  const MarketDataCard({super.key, required this.marketData});
+  const MarketDataCard({
+    super.key,
+    required this.marketData,
+    this.animationDuration = const Duration(milliseconds: 500),
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +20,10 @@ class MarketDataCard extends StatelessWidget {
     final String percentText = marketData.changePercent24h >= 0
         ? '+${marketData.changePercent24h.toStringAsFixed(2)}%'
         : '${marketData.changePercent24h.toStringAsFixed(2)}%';
-    final String amountText = marketData.changePercent24h >= 0
+    final String amountText = marketData.change24h >= 0
         ? '+${marketData.change24h.toStringAsFixed(2)}'
-        : marketData.change24h.toStringAsFixed(2);
+        : '${marketData.change24h.toStringAsFixed(2)}';
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -27,7 +33,7 @@ class MarketDataCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Symbol and price
+            // Symbol and animated price
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -37,9 +43,19 @@ class MarketDataCard extends StatelessWidget {
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  currencyFormat.format(marketData.price),
-                  style: const TextStyle(fontSize: 14, color: Colors.black87),
+
+                // TweenAnimationBuilder for price
+                TweenAnimationBuilder<double>(
+                  tween: Tween<double>(
+                      begin: marketData.price, end: marketData.price),
+                  duration: animationDuration,
+                  builder: (context, value, child) {
+                    return Text(
+                      currencyFormat.format(value),
+                      style:
+                          const TextStyle(fontSize: 14, color: Colors.black87),
+                    );
+                  },
                 ),
               ],
             ),

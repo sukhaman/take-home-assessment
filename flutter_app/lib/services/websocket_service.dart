@@ -5,30 +5,65 @@ import '../utils/constants.dart';
 
 class WebSocketService {
   WebSocketChannel? _channel;
-  StreamController<Map<String, dynamic>>? _controller;
+  late StreamController<Map<String, dynamic>> _controller;
 
-  // TODO: Implement WebSocket connection
-  // - connect()
-  // - disconnect()
-  // - Stream<Map<String, dynamic>> get stream
-  // - Handle real-time market updates
+  bool _isConnected = false;
 
-  Stream<Map<String, dynamic>>? get stream => _controller?.stream;
+  Stream<Map<String, dynamic>> get stream => _controller.stream;
 
+  /// Connect to WebSocket
   void connect() {
-    // TODO: Implement WebSocket connection to AppConstants.wsUrl
-    // Parse incoming messages and add to stream
-    // Example:
-    // _controller = StreamController<Map<String, dynamic>>.broadcast();
-    // _channel = WebSocketChannel.connect(Uri.parse(AppConstants.wsUrl));
-    // _channel!.stream.listen((message) {
-    //   final data = json.decode(message);
-    //   _controller?.add(data);
-    // });
+    if (_isConnected) return;
+
+    _controller = StreamController<Map<String, dynamic>>.broadcast();
+
+    try {
+      _channel = WebSocketChannel.connect(
+        Uri.parse(AppConstants.wsUrl),
+      );
+
+      _isConnected = true;
+
+      _channel!.stream.listen(
+        (message) {
+          try {
+            final decoded = json.decode(message);
+
+            // Ensure message is a JSON object
+            if (decoded is Map<String, dynamic>) {
+              _controller.add(decoded);
+            }
+          } catch (e) {
+            // Ignore malformed messages
+            print('WebSocket JSON parse error: $e');
+          }
+        },
+        onError: (error) {
+          print('WebSocket error: $error');
+          disconnect();
+        },
+        onDone: () {
+          print('WebSocket connection closed');
+          disconnect();
+        },
+        cancelOnError: true,
+      );
+    } catch (e) {
+      print('WebSocket connection failed: $e');
+      disconnect();
+    }
   }
 
+  /// Disconnect and clean up
   void disconnect() {
+    if (!_isConnected) return;
+
+    _isConnected = false;
     _channel?.sink.close();
-    _controller?.close();
+    _channel = null;
+
+    if (!_controller.isClosed) {
+      _controller.close();
+    }
   }
 }

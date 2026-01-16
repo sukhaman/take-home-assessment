@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:pulsenow_flutter/widgets/market_data_card.dart';
 import '../providers/market_data_provider.dart';
+import '../widgets/market_data_card.dart';
 
 class MarketDataScreen extends StatefulWidget {
   const MarketDataScreen({super.key});
@@ -14,6 +14,7 @@ class _MarketDataScreenState extends State<MarketDataScreen> {
   @override
   void initState() {
     super.initState();
+    // Load data after first frame to avoid setState during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = Provider.of<MarketDataProvider>(context, listen: false);
       provider.loadMarketData();
@@ -23,9 +24,9 @@ class _MarketDataScreenState extends State<MarketDataScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('Market Data')),
       body: Consumer<MarketDataProvider>(
         builder: (context, provider, child) {
-          // Full-screen loading on first load
           if (provider.isLoading && provider.marketData.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -38,9 +39,8 @@ class _MarketDataScreenState extends State<MarketDataScreen> {
                   Text(provider.error!),
                   const SizedBox(height: 10),
                   ElevatedButton(
-                    onPressed: () => provider.loadMarketData(),
-                    child: const Text('Retry'),
-                  ),
+                      onPressed: () => provider.loadMarketData(),
+                      child: const Text('Retry')),
                 ],
               ),
             );
@@ -48,11 +48,8 @@ class _MarketDataScreenState extends State<MarketDataScreen> {
 
           if (provider.marketData.isEmpty) {
             return const Center(
-              child: Text(
-                'No market data available',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-            );
+                child: Text('No market data available',
+                    style: TextStyle(fontSize: 16, color: Colors.grey)));
           }
 
           return RefreshIndicator(
