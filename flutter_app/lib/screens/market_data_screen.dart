@@ -24,7 +24,6 @@ class _MarketDataScreenState extends State<MarketDataScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Market Data')),
       body: Consumer<MarketDataProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading && provider.marketData.isEmpty) {
