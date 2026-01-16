@@ -6,15 +6,15 @@ import '../utils/constants.dart';
 class WebSocketService {
   WebSocketChannel? _channel;
   StreamController<Map<String, dynamic>>? _controller;
-  
+
   // TODO: Implement WebSocket connection
   // - connect()
   // - disconnect()
   // - Stream<Map<String, dynamic>> get stream
   // - Handle real-time market updates
-  
+
   Stream<Map<String, dynamic>>? get stream => _controller?.stream;
-  
+
   void connect() {
     // TODO: Implement WebSocket connection to AppConstants.wsUrl
     // Parse incoming messages and add to stream
@@ -26,7 +26,7 @@ class WebSocketService {
     //   _controller?.add(data);
     // });
   }
-  
+
   void disconnect() {
     _channel?.sink.close();
     _controller?.close();
